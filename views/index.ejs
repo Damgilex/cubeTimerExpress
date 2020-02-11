@@ -1,0 +1,67 @@
+<%- include ('partials/_header') %>
+
+<h1>HOME PAGE</h1>
+
+
+<div class="container">
+    <h1><p id="output"><b>00:00:00</b></p></h1>
+    <div id="controls" style="text-align: center;">
+        <button id= "startPause" onclick="start()"><b id="start">Start</b></button>
+        <button onclick="reset()" id="reset"><b id="reset">Reset</b></button>
+    </div>
+</div>
+<button onclick="guardar()">Guardar</button>
+
+
+<!-- ############### -->
+<!-- ## SCRIPT ## -->
+<!-- ############### -->
+<script>
+    var time = 0;
+    var running = false;
+
+    function start(){
+        if(!running){
+            running = true;
+            increment();
+        }
+    }
+
+    function reset(){
+        running = false;
+        
+    }
+
+    function increment(){
+        if(running){
+            setTimeout(function(){
+                time++;
+                var mins = Math.floor(time/10/60);
+                var secs = Math.floor(time/10 % 60);
+                var hours = Math.floor(time/10/60/60);
+                var tenths = time % 10;
+                if(mins < 10){
+                    mins = "0" + mins;
+                }
+                if(secs < 10){
+                    secs = "0" + secs;
+                }
+
+                var timeString =  (mins > 0) ? mins + ":" + secs + ":" + tenths + "0" : secs + ":" + tenths + "0";
+                document.getElementById("output").innerHTML =  timeString;
+                increment();
+            },100)
+        }else{
+            time = 0;
+            document.getElementById("output").innerHTML = "00:00";
+        }
+    }
+
+    function guardar(){
+
+        console.log(time);
+    }
+
+</script>
+
+<%- include ('partials/_footer') %>
