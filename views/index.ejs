@@ -1,27 +1,76 @@
 <%- include ('partials/_header') %>
 
-<h1>HOME PAGE</h1>
+
 
 
 <div class="container">
-    <h1><p id="output"><b>00:00:00</b></p></h1>
-    <div id="controls" style="text-align: center;">
-        <button id= "startPause" onclick="start()"><b id="start">Start</b></button>
-        <button onclick="reset()" id="reset"><b id="reset">Reset</b></button>
+    <div class="row">
+
+        <!-- Form -->
+        <form  id="formTimerCount" action="/saveTime" method="POST" style="margin: 0 auto; padding: 5rem 0;">
+            <div class="form-group">
+                <p id="output" style=" font-size: 10rem; text-align: center;">00.00</p>
+                <!-- <input id="output" type="text" readonly name="time" value="00.00" style="border:none; font-size: 5rem;"> -->
+            </div>
+        </form>
+       
     </div>
+    <div id="sectionTwo">
+        <div class="row" style="margin-top: 2rem;">
+            <p style="text-align: center; font-size: 1.5rem; width: 100%;">Spacebar to Start/Stop</p>
+        </div>
+    </div>
+   
 </div>
-<button onclick="guardar()">Guardar</button>
+
 
 
 <!-- ############### -->
-<!-- ## SCRIPT ## -->
+<!-- ## SCRIPTS ## -->
 <!-- ############### -->
 <script>
     var time = 0;
     var running = false;
+    var ready = true; //To avoid start timer when stop by pressing spacebar
+
+
+    $("#formTimerCount").submit(function(e){
+
+        e.preventDefault();
+        var data = time;
+        
+        $.ajax({
+            type: 'POST',
+            url: '/saveTime',
+            data: {'time': data},
+            dataType: 'text',
+            success:function(){
+                console.log(time);
+            } 
+        });
+    });
+
+    document.body.onkeyup = function(e){
+
+        if(ready && e.keyCode == 32){
+            start();
+        }else{
+            ready = true;
+        }
+    }
+
+    document.body.onkeypress = function(e){
+
+        if(running && e.keyCode == 32){
+            $('#formTimerCount').submit();
+            ready = false;
+            reset();
+        }
+    }
 
     function start(){
         if(!running){
+            document.getElementById('sectionTwo').hidden = true;
             running = true;
             increment();
         }
@@ -29,31 +78,35 @@
 
     function reset(){
         running = false;
-        
+        document.getElementById('sectionTwo').hidden = false;
+    }
+   
+    function convertTimeToString(timeToConvert){
+        var mins = Math.floor(time/10/60);
+        var secs = Math.floor(timeToConvert/10 % 60);
+        var hours = Math.floor(timeToConvert/10/60/60);
+        var tenths = timeToConvert % 10;
+        if(mins < 10){
+            mins = "0" + mins;
+        }
+        if(secs < 10){
+            secs = "0" + secs;
+        }
+
+        return (mins > 0) ? mins + ":" + secs + ":" + tenths + "0" : secs + "." + tenths + "0";
     }
 
     function increment(){
         if(running){
             setTimeout(function(){
                 time++;
-                var mins = Math.floor(time/10/60);
-                var secs = Math.floor(time/10 % 60);
-                var hours = Math.floor(time/10/60/60);
-                var tenths = time % 10;
-                if(mins < 10){
-                    mins = "0" + mins;
-                }
-                if(secs < 10){
-                    secs = "0" + secs;
-                }
-
-                var timeString =  (mins > 0) ? mins + ":" + secs + ":" + tenths + "0" : secs + ":" + tenths + "0";
-                document.getElementById("output").innerHTML =  timeString;
+                var timeString = convertTimeToString(time);
+                document.getElementById("output").innerText =  timeString;
                 increment();
             },100)
         }else{
             time = 0;
-            document.getElementById("output").innerHTML = "00:00";
+            document.getElementById("output").innerText = "00.00";
         }
     }
 
@@ -63,5 +116,6 @@
     }
 
 </script>
+
 
 <%- include ('partials/_footer') %>
